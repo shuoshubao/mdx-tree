@@ -98,60 +98,37 @@ app.use(async ctx => {
 
   const absolutePath = join(root, url)
 
-  if (!existsSync(absolutePath)) {
-    const html = getHtml({
-      code: 404,
-      name: '',
-      isFile: false,
-      type: '',
-      size: 0,
-      ctime: '',
-      mtime: ''
-    })
-    ctx.body = html
-    return
-  }
-
-  const stats = lstatSync(absolutePath)
-
-  if (stats.isFile()) {
-    const type = mime.lookup(absolutePath)
-    if (type) {
-      ctx.type = type
-      ctx.body = readFileSync(absolutePath)
-    } else {
-      ctx.body = readFileSync(absolutePath).toString()
-    }
-    return
-  }
-
-  if (stats.isDirectory()) {
-    const indexHtml = join(absolutePath, 'index.html')
-    if (existsSync(indexHtml)) {
-      ctx.type = 'text/html'
-      ctx.body = readFileSync(indexHtml)
+  if (existsSync(absolutePath)) {
+    const stats = lstatSync(absolutePath)
+    if (stats.isFile()) {
+      const type = mime.lookup(absolutePath)
+      if (type) {
+        ctx.type = type
+        ctx.body = readFileSync(absolutePath)
+      } else {
+        ctx.body = readFileSync(absolutePath).toString()
+      }
       return
     }
-    const files = glob.sync(`${root}/**`, { nodir: true }).map(v => {
-      const stats = lstatSync(v)
-      const isFile = stats.isFile()
-      return {
-        name: relative(absolutePath, v),
-        isFile,
-        type: isFile ? mime.lookup(v) || 'text/plain' : 'folder'
-      }
-    })
-    const data = {
-      root,
-      url,
-      files: sortBy(files, v => v.isFile)
-    }
-    const html = getHtml(data)
-    ctx.body = html
-    return
   }
 
-  ctx.body = absolutePath
+  const files = glob.sync(`${root}/**`, { nodir: true }).map(v => {
+    const stats = lstatSync(v)
+    const isFile = stats.isFile()
+    return {
+      name: relative(root, v),
+      isFile,
+      type: isFile ? mime.lookup(v) || 'text/plain' : 'folder'
+    }
+  })
+
+  const data = {
+    root,
+    url,
+    files: sortBy(files, v => v.isFile)
+  }
+  const html = getHtml(data)
+  ctx.body = html
 })
 
 const logServerInfo = port => {
