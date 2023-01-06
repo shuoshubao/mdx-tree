@@ -1,0 +1,51 @@
+{
+  "name": "mdx-tree",
+  "version": "0.1.1",
+  "description": "mdx-tree",
+  "repository": {
+    "url": "https://github.com/shuoshubao/mdx-tree.git",
+    "type": "git"
+  },
+  "author": "shuoshubao <759979885@qq.com>",
+  "bin": {
+    "mdx-tree": "index.js"
+  },
+  "files": [
+    "dist",
+    "index.js"
+  ],
+  "keywords": [
+    "mdx-tree"
+  ],
+  "scripts": {
+    "start": "esbuild lib/index.js  --outdir=dist --loader:.js=jsx --bundle --watch",
+    "build": "esbuild lib/index.js --outdir=dist --loader:.js=jsx --bundle --minify",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@koa/cors": "^4.0.0",
+    "@nbfe/js2html": "^1.1.8",
+    "chalk": "^4.1.2",
+    "glob": "^8.0.3",
+    "koa": "^2.14.1",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
+    "portfinder": "^1.0.32",
+    "yargs": "^17.6.2"
+  },
+  "devDependencies": {
+    "antd": "^5.1.1",
+    "esbuild": "^0.16.12",
+    "filesize": "^8.0.7",
+    "highlight.js": "^11.7.0",
+    "lodash-es": "^4.17.21",
+    "markdown-it": "^13.0.1",
+    "markdown-it-anchor": "^8.6.6",
+    "markdown-it-attrs": "^4.1.6",
+    "markdown-it-task-lists": "^2.1.1",
+    "punycode": "^2.1.1",
+    "re-resizable": "^6.9.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
