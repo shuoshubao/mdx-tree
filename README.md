@@ -1,6 +1,6 @@
 # mdx-tree
 
-
+Visually view your local markdown file system on the webpage.
 
 # Install
 

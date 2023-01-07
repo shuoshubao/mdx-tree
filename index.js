@@ -112,7 +112,7 @@ app.use(async ctx => {
     }
   }
 
-  const files = glob.sync(`${root}/**`, { nodir: true }).map(v => {
+  const files = glob.sync(`${root}/**/*.md`).map(v => {
     const stats = lstatSync(v)
     const isFile = stats.isFile()
     return {
