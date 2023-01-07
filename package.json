@@ -1,6 +1,6 @@
 {
   "name": "mdx-tree",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Visually view your local markdown file system on the webpage.",
   "repository": {
     "url": "https://github.com/shuoshubao/mdx-tree.git",
