@@ -10,6 +10,7 @@ import {
   Skeleton,
   Tree,
   Typography,
+  Image,
   message,
   theme
 } from 'antd'
@@ -17,6 +18,7 @@ import copy from 'copy-to-clipboard'
 import { CaretRightOutlined, CaretLeftOutlined } from '@ant-design/icons'
 import { Resizable } from 're-resizable'
 import { map } from 'lodash-es'
+import 'antd/dist/reset.css'
 import { name as pkgName } from '../package'
 import { isDark, addListenerPrefersColorScheme, pathsToTree } from './util'
 import { MarkdownItHighlight, getMarkdownTocData } from './markdown'
@@ -68,6 +70,10 @@ const App = () => {
 
   const [html, setHtml] = useState('')
 
+  const [visible, setVisible] = useState(false)
+  const [imageList, setImageList] = useState([])
+  const [currentImgIndex, setCurrentImgIndex] = useState(0)
+
   const [messageApi, contextHolder] = message.useMessage()
 
   const updateSelectedKeys = () => {
@@ -90,11 +96,14 @@ const App = () => {
     updateSelectedKeys()
     setTocData(TocData)
     setSelectedKeys([pathname + '.md'])
+    setTimeout(() => {
+      setImageList([...document.querySelectorAll('.markdown-body img')].map(v => v.src))
+    }, 1)
   }
 
   useEffect(() => {
     fetchData()
-  }, [setHtml, setTocData, setSelectedKeys])
+  }, [setHtml, setTocData, setSelectedKeys, setImageList])
 
   useEffect(() => {
     window.addEventListener('popstate', () => {
@@ -131,6 +140,23 @@ const App = () => {
 
     return () => {
       document.body.removeEventListener('click', handleCopy)
+    }
+  }, [])
+
+  const handlePreviewImage = e => {
+    const { tagName, src } = e.target
+    if (tagName === 'IMG') {
+      const index = [...document.querySelectorAll('.markdown-body img')].map(v => v.src).indexOf(src)
+      setCurrentImgIndex(index)
+      setVisible(true)
+    }
+  }
+
+  useEffect(() => {
+    document.body.addEventListener('click', handlePreviewImage)
+
+    return () => {
+      document.body.removeEventListener('click', handlePreviewImage)
     }
   }, [])
 
@@ -269,6 +295,19 @@ const App = () => {
           defaultExpandAll
         />
       </Sider>
+      <div style={{ display: 'none' }}>
+        <Image.PreviewGroup
+          preview={{
+            visible,
+            current: currentImgIndex,
+            onVisibleChange: vis => setVisible(vis)
+          }}
+        >
+          {imageList.map(v => {
+            return <Image key={v} src={v} />
+          })}
+        </Image.PreviewGroup>
+      </div>
       {contextHolder}
     </>
   )
