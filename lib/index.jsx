@@ -269,7 +269,7 @@ const App = () => {
           height: 44,
           fontSize: 12,
           border: `1px solid ${token.colorBorderSecondary}`,
-          borderRadius: tocCollapsed ? '0 6px 6px 0' : 6,
+          borderRadius: tocCollapsed ? '6px 0 0 6px' : 6,
           overflow: 'hidden'
         }}
         trigger={tocCollapsed ? <CaretLeftOutlined /> : <CaretRightOutlined />}
