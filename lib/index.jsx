@@ -1,28 +1,27 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { createRoot } from 'react-dom/client'
+import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons'
 import {
   Button,
   Card,
   ConfigProvider,
   FloatButton,
+  Image,
   Layout,
   Result,
   Skeleton,
   Tree,
   Typography,
-  Image,
   message,
   theme
 } from 'antd'
-import copy from 'copy-to-clipboard'
-import { CaretRightOutlined, CaretLeftOutlined } from '@ant-design/icons'
-import { Resizable } from 're-resizable'
-import { map } from 'lodash-es'
 import 'antd/dist/reset.css'
+import copy from 'copy-to-clipboard'
+import { Resizable } from 're-resizable'
+import { useEffect, useRef, useState } from 'react'
+import { createRoot } from 'react-dom/client'
 import { name as pkgName } from '../package'
-import { isDark, addListenerPrefersColorScheme, pathsToTree } from './util'
-import { MarkdownItHighlight, getMarkdownTocData } from './markdown'
 import './index.css'
+import { MarkdownItHighlight, getMarkdownTocData } from './markdown'
+import { addListenerPrefersColorScheme, isDark, pathsToTree } from './util'
 
 const { Sider, Content } = Layout
 const { Text } = Typography
@@ -45,11 +44,13 @@ const FilesTreeData = pathsToTree(
 const getInitExpandedKeys = () => {
   const pathname = decodeURIComponent(window.location.pathname.slice(1))
   if (pathname.length === 0) {
-    return map(files, 'name')
+    return files.map(v => v.name)
   }
-  return map(files, 'name').filter(v => {
-    return v.startsWith(pathname)
-  })
+  return files
+    .map(v => v.name)
+    .filter(v => {
+      return v.startsWith(pathname)
+    })
 }
 
 const App = () => {
@@ -119,7 +120,7 @@ const App = () => {
     }
   }, [])
 
-  const handleCopy = e => {
+  const handleCopy = async e => {
     const { target } = e
     let targetNode
     if (target.classList.contains('anticon-copy')) {

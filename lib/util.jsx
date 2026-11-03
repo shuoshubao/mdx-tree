@@ -1,6 +1,5 @@
-import React from 'react'
-import { last, find } from 'lodash-es'
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons'
+import { find, last, sortBy } from 'lodash-es'
 
 export const isDark = () => {
   const { matchMedia } = window
@@ -45,5 +44,12 @@ export const pathsToTree = (paths = [], files = []) => {
       return prev[cur]
     }, level)
   })
-  return result
+  return sortFoldersFirst(result)
+}
+
+const sortFoldersFirst = nodes => {
+  nodes.forEach(v => {
+    v.children = sortFoldersFirst(v.children)
+  })
+  return sortBy(nodes, v => v.children.length === 0)
 }

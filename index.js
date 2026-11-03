@@ -1,18 +1,17 @@
 #!/usr/bin/env node
+import cors from '@koa/cors'
+import chalk from 'chalk'
+import { existsSync, lstatSync, readFileSync } from 'fs'
+import { globSync } from 'glob'
+import Koa from 'koa'
+import mime from 'mime-types'
+import { dirname, join, resolve } from 'path'
+import portfinder from 'portfinder'
+import { fileURLToPath } from 'url'
+import { hideBin } from 'yargs/helpers'
+import yargs from 'yargs/yargs'
 
-const { existsSync, lstatSync, readFileSync } = require('fs')
-const { resolve, join, relative } = require('path')
-const yargs = require('yargs/yargs')
-const { hideBin } = require('yargs/helpers')
-const Koa = require('koa')
-const cors = require('@koa/cors')
-const portfinder = require('portfinder')
-const mime = require('mime-types')
-const chalk = require('chalk')
-const glob = require('glob')
-const { startCase, first, sortBy } = require('lodash')
-const { generateDocument } = require('@nbfe/js2html')
-const { name: pkgName } = require('./package')
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const { argv } = yargs(hideBin(process.argv))
 
@@ -27,7 +26,7 @@ const formatTime = time => {
 
 const cwd = process.cwd()
 
-const root = resolve(cwd, first(argv._) || '')
+const root = resolve(cwd, argv._[0] || '')
 
 const VirtualPath = [Date.now(), Math.random()].join('_')
 
@@ -36,40 +35,22 @@ const CssVirtualPath = ['', VirtualPath, 'index.css'].join('/')
 
 const getHtml = data => {
   data.VirtualPath = VirtualPath
-  return generateDocument({
-    title: startCase(pkgName),
-    meta: [
-      {
-        charset: 'utf-8'
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1'
-      }
-    ],
-    link: [
-      {
-        rel: 'shortcut icon',
-        href: 'https://nodejs.org/static/images/favicons/favicon.ico'
-      }
-    ],
-    headScript: [],
-    style: [
-      {
-        text: 'body {margin: 0;}'
-      },
-      CssVirtualPath
-    ],
-    bodyHtml: ['<div id="app"></div>'],
-    script: [
-      {
-        text: `window.data = ${JSON.stringify(data)}`
-      },
-      {
-        src: JavaScriptVirtualPath
-      }
-    ]
-  })
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mdx Tree</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="https://vite.dev/logo-without-border.svg">
+    <style>body {margin: 0;}</style>
+    <link rel="stylesheet" href="${CssVirtualPath}">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>window.data = ${JSON.stringify(data)}</script>
+    <script src="${JavaScriptVirtualPath}"></script>
+  </body>
+</html>`
 }
 
 app.use(async ctx => {
@@ -112,20 +93,23 @@ app.use(async ctx => {
     }
   }
 
-  const files = glob.sync(`${root}/**/*.md`).map(v => {
-    const stats = lstatSync(v)
-    const isFile = stats.isFile()
-    return {
-      name: relative(root, v),
-      isFile,
-      type: isFile ? mime.lookup(v) || 'text/plain' : 'folder'
+  const files = globSync('**/*.md', { cwd: root, dot: true, ignore: ['**/node_modules/**', '**/.git/**'] }).map(
+    name => {
+      const v = join(root, name)
+      const stats = lstatSync(v)
+      const isFile = stats.isFile()
+      return {
+        name,
+        isFile,
+        type: isFile ? mime.lookup(v) || 'text/plain' : 'folder'
+      }
     }
-  })
+  )
 
   const data = {
     root,
     url,
-    files: sortBy(files, v => v.isFile)
+    files: files.sort((a, b) => a.isFile - b.isFile)
   }
   const html = getHtml(data)
   ctx.body = html
